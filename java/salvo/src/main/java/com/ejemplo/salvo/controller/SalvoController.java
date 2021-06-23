@@ -39,7 +39,7 @@ public class SalvoController {
     //private SalvoRepository salvoRepository;
 
     @Autowired
-    SalvoService salvoService;
+    private SalvoService salvoService;
 
     @Autowired
     private ScoreRepository scoreRepository;
