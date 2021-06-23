@@ -1,10 +1,7 @@
 package com.ejemplo.salvo.controller;
 
 import com.ejemplo.salvo.model.*;
-import com.ejemplo.salvo.repository.GameRepository;
-import com.ejemplo.salvo.repository.PlayerRepository;
-import com.ejemplo.salvo.repository.SalvoRepository;
-import com.ejemplo.salvo.repository.ShipRepository;
+import com.ejemplo.salvo.repository.*;
 import com.ejemplo.salvo.service.GamePlayerService;
 import com.ejemplo.salvo.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +40,9 @@ public class SalvoController {
 
     @Autowired
     private SalvoRepository salvoRepository;
+
+    @Autowired
+    private ScoreRepository scoreRepository;
 
 
     /////////////////////////////////////////
@@ -343,7 +343,7 @@ public class SalvoController {
 
         dto.put("id", gameP.getGame().getIdGame());
         dto.put("created", gameP.getGame().getCreationDate());
-        //dto.put("gameState", this.getState(gameP));
+        dto.put("gameState", this.getState(gameP));
 
         dto.put("gamePlayers", gameP.getGame().getGamePlayerSet()
                                               .stream()
@@ -367,7 +367,7 @@ public class SalvoController {
         return dto;
     }
 
-    /*private String getState(GamePlayer gamePlayer) {
+    private String getState(GamePlayer gamePlayer) {
 
         if (gamePlayer.getShips().isEmpty()){
             return "PLACESHIPS";
@@ -375,25 +375,36 @@ public class SalvoController {
 
 
         if(gamePlayer.getGame().getGamePlayerSet().size() == 1 || this.getOpponent(gamePlayer).getShips().isEmpty()){
-            return "WAIT";
-        }
-
-        if (gamePlayer.getSalvos().size() > this.getOpponent(gamePlayer).getSalvos().size()){
             return "WAITINGFOROPP";
         }
 
+        if (gamePlayer.getSalvos().size() > this.getOpponent(gamePlayer).getSalvos().size()){
+            return "WAIT";
+        }
+
+        Score score = new Score();
+        score.setGame(gamePlayer.getGame());
+        score.setPlayer(gamePlayer.getPlayer());
+        score.setFinishDate(new Date());
+
+        if (this.getLost(gamePlayer, this.getOpponent(gamePlayer)) && this.getWin(gamePlayer, this.getOpponent(gamePlayer)) ){
+            score.setScore(0.5);
+            scoreRepository.save(score);
+            return "TIE";
+        }
 
         if (this.getLost(gamePlayer, this.getOpponent(gamePlayer))){
+            score.setScore(0);
+            scoreRepository.save(score);
             return "LOST";
         }
 
         if (this.getWin(gamePlayer, this.getOpponent(gamePlayer))){
+            score.setScore(1);
+            scoreRepository.save(score);
             return "WIN";
         }
 
-        if (this.getLost(gamePlayer, this.getOpponent(gamePlayer)) && this.getWin(gamePlayer, this.getOpponent(gamePlayer)) ){
-            return "TIE";
-        }
         return "PLAY";
     }
 
@@ -422,7 +433,7 @@ public class SalvoController {
                             .collect(Collectors.toList()));
         }
         return false;
-    }*/
+    }
 
     /*Metodo para obtener al oponente*/
     private GamePlayer getOpponent(GamePlayer opponent){
@@ -470,9 +481,6 @@ public class SalvoController {
         List<String> destroyerLocations = getHitsLocations("destroyer", self);
         List<String> patrolboatLocations = getHitsLocations("patrolboat", self);*/
 
-        for (Salvo salvo: opponent.getSalvos()) {
-
-        }
 
         //itero los salvos
         for (Salvo salvo : opponent.getSalvos()) {
@@ -489,7 +497,7 @@ public class SalvoController {
             Map<String, Object> hitsPorTurn = new LinkedHashMap<String, Object>();
 
             List<String> hitsLocations = new ArrayList<>();
-            List<String> salvoLocationList = new ArrayList<>();
+           // List<String> salvoLocationList = new ArrayList<>();
 
             //por cada salvo debo iterar los tiros
             for (String locations : salvo.getSalvoLocations()) {
@@ -528,13 +536,13 @@ public class SalvoController {
                     missed--;
                 }
 
-                damagesPorTur.put("carrierHits", carrierHits);
-                damagesPorTur.put("battleshipHits", battleshipHits);
-                damagesPorTur.put("submarineHits", submarineHits);
-                damagesPorTur.put("destroyerHits", destroyerHits);
-                damagesPorTur.put("patrolboatHits", patrolsHits);
-            }
 
+            }
+            damagesPorTur.put("carrierHits", carrierHits);
+            damagesPorTur.put("battleshipHits", battleshipHits);
+            damagesPorTur.put("submarineHits", submarineHits);
+            damagesPorTur.put("destroyerHits", destroyerHits);
+            damagesPorTur.put("patrolboatHits", patrolsHits);
 
 
             damagesPorTur.put("carrier", carrierDamage);
@@ -545,7 +553,7 @@ public class SalvoController {
 
             hitsPorTurn.put("turn", salvo.getTurn());
             hitsPorTurn.put("hitLocations", hitsLocations);
-            hitsPorTurn.put("damagesPorTur", damagesPorTur);
+            hitsPorTurn.put("damages", damagesPorTur);
             hitsPorTurn.put("missed", missed);
             hits.add(hitsPorTurn);
         }
