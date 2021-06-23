@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/WorkspaceInt.iml" filepath="$PROJECT_DIR$/.idea/WorkspaceInt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/java/salvo/salvo.iml" filepath="$PROJECT_DIR$/java/salvo/salvo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/preparacion/salvo/salvo (1) (com.accenture).iml" filepath="$PROJECT_DIR$/preparacion/salvo/salvo (1) (com.accenture).iml" />
+    </modules>
+  </component>
+</project>
