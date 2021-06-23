@@ -1,8 +1,9 @@
 package com.ejemplo.salvo.controller;
-
 import com.ejemplo.salvo.model.*;
 import com.ejemplo.salvo.repository.*;
 import com.ejemplo.salvo.service.GamePlayerService;
+import com.ejemplo.salvo.service.PlayerService;
+import com.ejemplo.salvo.service.SalvoService;
 import com.ejemplo.salvo.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,9 +23,6 @@ public class SalvoController {
     @Autowired
     private GameRepository gameRepo;
 
-    //@Autowired
-    //private GamePlayerRepository gamePlayerRepository;
-
     @Autowired
     private GamePlayerService gamePlayerService;
 
@@ -35,21 +32,20 @@ public class SalvoController {
     @Autowired
     private ShipRepository shipRepository;
 
+    @Autowired
+    private PlayerService playerService;
+
     //@Autowired
-    //private PlayerService playerService;
+    //private SalvoRepository salvoRepository;
 
     @Autowired
-    private SalvoRepository salvoRepository;
+    SalvoService salvoService;
 
     @Autowired
     private ScoreRepository scoreRepository;
 
-
     /////////////////////////////////////////
-
     /****************************************/
-
-
     @RequestMapping("/games")
     public Map<String, Object> gamesList(Authentication authentication) {
         Map<String, Object> dto = new LinkedHashMap<>();
@@ -59,7 +55,6 @@ public class SalvoController {
         dto.put("player", !Util.isGuest(authentication) ? makePlayerDTO(playerRepository.findByUserName(authentication.getName())) : "Guest");
         dto.put("games", gameRepo.findAll().stream().map(games -> this.makeGameDTO(games)).collect(Collectors.toList()));
         return dto;
-
     }
 
     /*************************************************************************************************************/
@@ -78,7 +73,7 @@ public class SalvoController {
             return new ResponseEntity<>("Name already in use", HttpStatus.FORBIDDEN);
         }
 
-        playerRepository.save(new Player(email, passwordEncoder.encode(password)));
+        playerService.savePlayer(new Player(email, passwordEncoder.encode(password)));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -294,7 +289,7 @@ public class SalvoController {
 
        salvo.setGamePlayer(gameP);
        salvo.setTurn(turno);
-       salvoRepository.save(salvo);
+       salvoService.saveSalvo(salvo);
         return new ResponseEntity<>(Util.makeMap("OK", "Salvos created"), HttpStatus.CREATED);
     }
 

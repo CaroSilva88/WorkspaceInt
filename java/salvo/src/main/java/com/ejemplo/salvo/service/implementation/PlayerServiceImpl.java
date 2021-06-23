@@ -37,7 +37,7 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public Player finPlayerById(Long id) {
-        return null;
+        return playerRepository.findById(id).get();
     }
 
 
