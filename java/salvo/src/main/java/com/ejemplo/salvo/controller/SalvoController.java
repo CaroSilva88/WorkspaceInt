@@ -1,9 +1,7 @@
 package com.ejemplo.salvo.controller;
 import com.ejemplo.salvo.model.*;
 import com.ejemplo.salvo.repository.*;
-import com.ejemplo.salvo.service.GamePlayerService;
-import com.ejemplo.salvo.service.PlayerService;
-import com.ejemplo.salvo.service.SalvoService;
+import com.ejemplo.salvo.service.*;
 import com.ejemplo.salvo.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,19 +28,16 @@ public class SalvoController {
     private PlayerRepository playerRepository;
 
     @Autowired
-    private ShipRepository shipRepository;
+    ShipService shipService;
 
     @Autowired
     private PlayerService playerService;
-
-    //@Autowired
-    //private SalvoRepository salvoRepository;
 
     @Autowired
     private SalvoService salvoService;
 
     @Autowired
-    private ScoreRepository scoreRepository;
+    private ScoreService scoreService;
 
     /////////////////////////////////////////
     /****************************************/
@@ -221,7 +216,7 @@ public class SalvoController {
 
         ships.forEach(ship -> {
             ship.setGamePlayer(gamePlayer);
-            shipRepository.save(ship);
+            shipService.saveShip(ship);
         });
 
         return new ResponseEntity<>(Util.makeMap("OK", "Ships created"), HttpStatus.CREATED);
@@ -384,19 +379,19 @@ public class SalvoController {
 
         if (this.getLost(gamePlayer, this.getOpponent(gamePlayer)) && this.getWin(gamePlayer, this.getOpponent(gamePlayer)) ){
             score.setScore(0.5);
-            scoreRepository.save(score);
+            scoreService.saveScore(score);
             return "TIE";
         }
 
         if (this.getLost(gamePlayer, this.getOpponent(gamePlayer))){
             score.setScore(0);
-            scoreRepository.save(score);
+            scoreService.saveScore(score);
             return "LOST";
         }
 
         if (this.getWin(gamePlayer, this.getOpponent(gamePlayer))){
             score.setScore(1);
-            scoreRepository.save(score);
+            scoreService.saveScore(score);
             return "WIN";
         }
 
